@@ -1,0 +1,83 @@
+[
+  {
+    "template_id": "goal_high_1",
+    "event_id": "GOAL",
+    "intensity": "high",
+    "prefix_audio": "what_a_finish_from.wav",
+    "name_variant": "last_excited",
+    "suffix_audio": null,
+    "text_preview": "What a finish from {LAST_EXCITED}!"
+  },
+  {
+    "template_id": "goal_high_2",
+    "event_id": "GOAL",
+    "intensity": "high",
+    "prefix_audio": "incredible_strike_by.wav",
+    "name_variant": "last_excited",
+    "suffix_audio": null,
+    "text_preview": "Incredible strike by {LAST_EXCITED}!"
+  },
+  {
+    "template_id": "late_goal_1",
+    "event_id": "LATE_GOAL",
+    "intensity": "high",
+    "prefix_audio": null,
+    "name_variant": "goal_call",
+    "suffix_audio": "that_could_be_the_winner.wav",
+    "text_preview": "{GOAL_CALL}! That could be the winner!"
+  },
+  {
+    "template_id": "through_ball_1",
+    "event_id": "THROUGH_BALL",
+    "intensity": "medium",
+    "prefix_audio": null,
+    "name_variant": "last_neutral",
+    "suffix_audio": "is_through_on_goal.wav",
+    "text_preview": "{LAST_NEUTRAL} is through on goal!"
+  },
+  {
+    "template_id": "shot_saved_1",
+    "event_id": "SHOT_SAVED",
+    "intensity": "medium",
+    "prefix_audio": "good_effort_from.wav",
+    "name_variant": "last_neutral",
+    "suffix_audio": "but_the_keeper_saves_it.wav",
+    "text_preview": "Good effort from {LAST_NEUTRAL}, but the keeper saves it."
+  },
+  {
+    "template_id": "assist_1",
+    "event_id": "ASSIST",
+    "intensity": "medium",
+    "prefix_audio": "brilliant_vision_from.wav",
+    "name_variant": "full_neutral",
+    "suffix_audio": null,
+    "text_preview": "Brilliant vision from {FULL_NEUTRAL}."
+  },
+  {
+    "template_id": "yellow_card_1",
+    "event_id": "YELLOW_CARD",
+    "intensity": "low",
+    "prefix_audio": "a_late_challenge_there_by.wav",
+    "name_variant": "last_neutral",
+    "suffix_audio": null,
+    "text_preview": "A late challenge there by {LAST_NEUTRAL}."
+  },
+  {
+    "template_id": "substitution_1",
+    "event_id": "SUBSTITUTION",
+    "intensity": "low",
+    "prefix_audio": "and_here_comes.wav",
+    "name_variant": "full_neutral",
+    "suffix_audio": null,
+    "text_preview": "And here comes {FULL_NEUTRAL}."
+  },
+  {
+    "template_id": "hat_trick_1",
+    "event_id": "HAT_TRICK",
+    "intensity": "high",
+    "prefix_audio": null,
+    "name_variant": "goal_call",
+    "suffix_audio": "a_hat_trick_on_a_night_to_remember.wav",
+    "text_preview": "{GOAL_CALL}! A hat trick on a night to remember."
+  }
+]
