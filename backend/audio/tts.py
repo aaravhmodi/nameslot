@@ -43,10 +43,10 @@ async def generate_name_clips(
             text=text,
             model_id="eleven_multilingual_v2",
             voice_settings=settings,
-            output_format="pcm_44100",
+            output_format="mp3_44100_128",
         )
 
-        out_path = out_dir / f"{variant_key}.wav"
+        out_path = out_dir / f"{variant_key}.mp3"
         save(audio, str(out_path))
         clips[variant_key] = str(out_path)
 
