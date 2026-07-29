@@ -4,7 +4,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import players, events, audio
+from routes import players, events, audio, exports
 
 app = FastAPI(title="NameSlot API")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(players.router, prefix="/players", tags=["players"])
 app.include_router(events.router, prefix="/events", tags=["events"])
 app.include_router(audio.router, prefix="/audio", tags=["audio"])
+app.include_router(exports.router, prefix="/exports", tags=["exports"])
 
 
 @app.get("/health")

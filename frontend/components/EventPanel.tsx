@@ -22,6 +22,13 @@ interface ClipHistoryItem {
   createdAt: string;
 }
 
+interface ExportPack {
+  pack_name: string;
+  pack_path: string;
+  zip_file: string;
+  clips_exported: number;
+}
+
 interface Props {
   playerId: string;
   displayName: string;
@@ -34,6 +41,8 @@ export default function EventPanel({ playerId, displayName }: Props) {
   const [error, setError] = useState("");
   const [autoPlay, setAutoPlay] = useState(true);
   const [history, setHistory] = useState<ClipHistoryItem[]>([]);
+  const [exportPack, setExportPack] = useState<ExportPack | null>(null);
+  const [exporting, setExporting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -104,6 +113,26 @@ export default function EventPanel({ playerId, displayName }: Props) {
     }
   }
 
+  async function exportForEafc() {
+    setExporting(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/exports/eafc/${playerId}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Failed to export EA FC pack.");
+        return;
+      }
+      setExportPack(data);
+    } catch {
+      setError("Could not reach the export API on localhost:8000.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <section className="space-y-5 border rounded-lg p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -120,6 +149,31 @@ export default function EventPanel({ playerId, displayName }: Props) {
           />
           Auto-play
         </label>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3">
+        <button
+          type="button"
+          onClick={exportForEafc}
+          disabled={exporting}
+          className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        >
+          {exporting ? "Exporting..." : "Export EA FC pack"}
+        </button>
+
+        {exportPack && (
+          <div className="text-sm text-gray-600">
+            <span className="font-medium text-gray-900">{exportPack.clips_exported}</span> clips exported
+            to <span className="font-mono">{exportPack.pack_name}</span>
+            {" "}
+            <a
+              className="font-medium text-black underline"
+              href={`${API_BASE}/exports/download/${exportPack.zip_file}`}
+            >
+              Download zip
+            </a>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
