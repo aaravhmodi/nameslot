@@ -6,7 +6,9 @@ from pydantic import BaseModel
 
 from video.analyzer import STORAGE, analyze_star_timeline, save_upload
 from video.commentary import ANALYSIS, generate_video_commentary
+from video.replacer import replace_commentary_phrase
 from video.renderer import export_proof_clips
+from video.transcriber import transcribe_video_with_whisper_cpp
 
 router = APIRouter()
 
@@ -19,6 +21,14 @@ class CommentaryRequest(BaseModel):
 class ProofClipRequest(BaseModel):
     padding_seconds: float = 2.0
     max_clips: int = 6
+
+
+class ReplacePhraseRequest(BaseModel):
+    player_id: str
+    start: float
+    end: float
+    replacement_text: str
+    padding_seconds: float = 2.0
 
 
 @router.post("/analyze-star")
@@ -83,3 +93,46 @@ def get_proof_clip(video_id: str, filename: str):
     if Path(filename).name != filename or not path.exists() or path.suffix.lower() != ".mp4":
         raise HTTPException(status_code=404, detail="Proof clip not found")
     return FileResponse(path, media_type="video/mp4", filename=filename)
+
+
+@router.post("/{video_id}/replace-phrase")
+async def create_replacement_clip(video_id: str, body: ReplacePhraseRequest):
+    try:
+        return await replace_commentary_phrase(
+            video_id=video_id,
+            player_id=body.player_id,
+            start=body.start,
+            end=body.end,
+            replacement_text=body.replacement_text,
+            padding_seconds=body.padding_seconds,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/replacement/{video_id}/{filename}")
+def get_replacement_clip(video_id: str, filename: str):
+    path = ANALYSIS / video_id / "replacements" / filename
+    if Path(filename).name != filename or not path.exists() or path.suffix.lower() != ".mp4":
+        raise HTTPException(status_code=404, detail="Replacement clip not found")
+    return FileResponse(path, media_type="video/mp4", filename=filename)
+
+
+@router.get("/replacement-audio/{video_id}/{filename}")
+def get_replacement_audio(video_id: str, filename: str):
+    path = ANALYSIS / video_id / "replacements" / filename
+    if Path(filename).name != filename or not path.exists() or path.suffix.lower() != ".mp3":
+        raise HTTPException(status_code=404, detail="Replacement audio not found")
+    return FileResponse(path, media_type="audio/mpeg", filename=filename)
+
+
+@router.post("/{video_id}/transcribe")
+def transcribe_video(video_id: str):
+    try:
+        return transcribe_video_with_whisper_cpp(video_id)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

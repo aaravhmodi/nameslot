@@ -73,15 +73,45 @@ interface ProofClipResult {
   clips: ProofClip[];
 }
 
+interface ReplacementResult {
+  video_id: string;
+  player_id: string;
+  start: number;
+  end: number;
+  replacement_text: string;
+  file: string;
+  video_url: string;
+  audio_url: string;
+}
+
+interface TranscriptSegment {
+  start: number;
+  end: number;
+  text: string;
+}
+
+interface TranscriptResult {
+  video_id: string;
+  engine: string;
+  segments: TranscriptSegment[];
+}
+
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [playerId, setPlayerId] = useState("");
   const [commentary, setCommentary] = useState<CommentaryResult | null>(null);
   const [proofClips, setProofClips] = useState<ProofClipResult | null>(null);
+  const [replaceStart, setReplaceStart] = useState("");
+  const [replaceEnd, setReplaceEnd] = useState("");
+  const [replacementText, setReplacementText] = useState("");
+  const [replacement, setReplacement] = useState<ReplacementResult | null>(null);
+  const [transcript, setTranscript] = useState<TranscriptResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [commentaryLoading, setCommentaryLoading] = useState(false);
   const [proofLoading, setProofLoading] = useState(false);
+  const [replacementLoading, setReplacementLoading] = useState(false);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function analyzeVideo(event: React.FormEvent) {
@@ -111,6 +141,8 @@ export default function VideoUploader() {
       setResult(data);
       setCommentary(null);
       setProofClips(null);
+      setReplacement(null);
+      setTranscript(null);
     } catch {
       setError("Could not reach the video API on localhost:8000.");
     } finally {
@@ -142,6 +174,7 @@ export default function VideoUploader() {
       }
       setCommentary(data);
       setProofClips(null);
+      setReplacement(null);
     } catch {
       setError("Could not reach the commentary API on localhost:8000.");
     } finally {
@@ -172,6 +205,73 @@ export default function VideoUploader() {
       setError("Could not reach the proof clip export API on localhost:8000.");
     } finally {
       setProofLoading(false);
+    }
+  }
+
+  async function replacePhrase() {
+    if (!result) {
+      return;
+    }
+    if (!playerId.trim()) {
+      setError("Enter the player ID from the commentary desk first.");
+      return;
+    }
+
+    const start = Number(replaceStart);
+    const end = Number(replaceEnd);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) {
+      setError("Enter valid start and end timestamps.");
+      return;
+    }
+
+    setReplacementLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/video/${result.video_id}/replace-phrase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          player_id: playerId.trim(),
+          start,
+          end,
+          replacement_text: replacementText,
+          padding_seconds: 2,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Replacement export failed.");
+        return;
+      }
+      setReplacement(data);
+    } catch {
+      setError("Could not reach the replacement export API on localhost:8000.");
+    } finally {
+      setReplacementLoading(false);
+    }
+  }
+
+  async function transcribeVideo() {
+    if (!result) {
+      return;
+    }
+
+    setTranscriptLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/video/${result.video_id}/transcribe`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Transcription failed.");
+        return;
+      }
+      setTranscript(data);
+    } catch {
+      setError("Could not reach the transcription API on localhost:8000.");
+    } finally {
+      setTranscriptLoading(false);
     }
   }
 
@@ -287,6 +387,50 @@ export default function VideoUploader() {
         </section>
       )}
 
+      {result && (
+        <section className="space-y-4 rounded-lg border border-white/10 bg-[#101613]/85 p-5 shadow-xl shadow-black/25 backdrop-blur">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium uppercase text-stone-400">Local transcript</p>
+              <h2 className="mt-1 text-2xl font-semibold text-stone-50">whisper.cpp</h2>
+              <p className="mt-2 max-w-2xl text-sm text-stone-400">
+                Transcribe original commentary locally, then use a segment timestamp in the replacement editor.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={transcribeVideo}
+              disabled={transcriptLoading}
+              className="rounded-md bg-[#9ab6bd] px-4 py-3 text-sm font-semibold uppercase text-[#101613] transition hover:bg-stone-100 disabled:opacity-50"
+            >
+              {transcriptLoading ? "Transcribing..." : "Transcribe audio"}
+            </button>
+          </div>
+
+          {transcript && (
+            <div className="max-h-96 space-y-2 overflow-auto rounded-md border border-white/10 bg-black/20 p-2">
+              {transcript.segments.map((segment, index) => (
+                <button
+                  key={`${segment.start}-${index}`}
+                  type="button"
+                  onClick={() => {
+                    setReplaceStart(String(segment.start));
+                    setReplaceEnd(String(segment.end));
+                    setReplacementText(segment.text);
+                  }}
+                  className="block w-full rounded px-3 py-2 text-left transition hover:bg-white/[0.06]"
+                >
+                  <span className="block text-xs font-medium text-[#d7c37a]">
+                    {segment.start.toFixed(2)}s - {segment.end.toFixed(2)}s
+                  </span>
+                  <span className="mt-1 block text-sm text-stone-300">{segment.text}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {commentary && (
         <section className="space-y-4 rounded-lg border border-white/10 bg-[#101613]/85 p-5 shadow-xl shadow-black/25 backdrop-blur">
           <div>
@@ -327,6 +471,72 @@ export default function VideoUploader() {
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {result && (
+        <section className="space-y-4 rounded-lg border border-white/10 bg-[#101613]/85 p-5 shadow-xl shadow-black/25 backdrop-blur">
+          <div>
+            <p className="text-xs font-medium uppercase text-stone-400">Phrase replacement</p>
+            <h2 className="mt-1 text-2xl font-semibold text-stone-50">Replace original commentary</h2>
+            <p className="mt-2 text-sm text-stone-400">
+              Use this when the original video already has commentary. Enter the exact time range
+              where the commentator says a generic or wrong name, then generate a short proof clip
+              with that section lowered and your ElevenLabs phrase inserted.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[120px_120px_1fr]">
+            <input
+              value={replaceStart}
+              onChange={(event) => setReplaceStart(event.target.value)}
+              placeholder="Start, 42.3"
+              className="min-w-0 rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#d7c37a]"
+            />
+            <input
+              value={replaceEnd}
+              onChange={(event) => setReplaceEnd(event.target.value)}
+              placeholder="End, 43.1"
+              className="min-w-0 rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#d7c37a]"
+            />
+            <input
+              value={replacementText}
+              onChange={(event) => setReplacementText(event.target.value)}
+              placeholder="Replacement, e.g. Aarav Modi"
+              className="min-w-0 rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#d7c37a]"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={replacePhrase}
+            disabled={replacementLoading}
+            className="rounded-md bg-[#d7c37a] px-4 py-3 text-sm font-semibold uppercase text-[#151512] transition hover:bg-stone-100 disabled:opacity-50"
+          >
+            {replacementLoading ? "Exporting replacement..." : "Export replacement clip"}
+          </button>
+
+          {replacement && (
+            <div className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
+              <video className="aspect-video w-full bg-black" controls src={`${API_BASE}${replacement.video_url}`} />
+              <div className="space-y-2 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-stone-50">
+                    {replacement.start.toFixed(2)}s - {replacement.end.toFixed(2)}s
+                  </span>
+                  <a
+                    className="text-sm font-medium text-[#d7c37a] underline"
+                    href={`${API_BASE}${replacement.video_url}`}
+                    download
+                  >
+                    Download MP4
+                  </a>
+                </div>
+                <p className="text-sm text-stone-300">Inserted: "{replacement.replacement_text}"</p>
+                <audio className="w-full" controls src={`${API_BASE}${replacement.audio_url}`} />
+              </div>
+            </div>
+          )}
         </section>
       )}
 

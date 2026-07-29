@@ -82,6 +82,23 @@ rdbm-notes.md     Local notes for FIFA Editor Tool / RDBM mapping
 The export does not call ElevenLabs. It only packages files that already exist in
 `storage/generated_names/` and `storage/final_outputs/`.
 
+## Commentary replacement scaffold
+
+The video lab also supports manual phrase replacement for clips that already contain
+commentary:
+
+1. Upload and analyze a gameplay video.
+2. Enter the NameSlot `player_id`.
+3. Enter the start/end timestamp where the original commentator says a generic or
+   wrong name.
+4. Enter the replacement phrase.
+5. Export a proof clip.
+
+The backend uses local FFmpeg to lower the original audio during that timestamp and
+overlay the generated ElevenLabs phrase. Transcription is intentionally left as a
+local/open-source plug-in point; good candidates are `faster-whisper`, `whisper.cpp`,
+or Vosk once a local model is installed.
+
 ## APIs needed
 
 | Service | What for | Tier |

@@ -20,7 +20,11 @@ def spoken_player_name(player: dict) -> str:
     return player["display_name"]
 
 
-def build_star_windows(timeline: list[dict], gap_seconds: float = 3.0) -> list[dict]:
+def build_star_windows(
+    timeline: list[dict],
+    gap_seconds: float = 3.0,
+    max_window_seconds: float = 6.0,
+) -> list[dict]:
     windows: list[dict] = []
     current: dict | None = None
 
@@ -35,7 +39,14 @@ def build_star_windows(timeline: list[dict], gap_seconds: float = 3.0) -> list[d
         anchor_x = float(anchor.get("x") or 0)
         anchor_y = float(anchor.get("y") or 0)
 
-        if current is None or time - current["end"] > gap_seconds:
+        current_duration = time - current["start"] if current else 0
+        should_start_window = (
+            current is None
+            or time - current["end"] > gap_seconds
+            or current_duration >= max_window_seconds
+        )
+
+        if should_start_window:
             current = {
                 "start": time,
                 "end": time,
@@ -182,9 +193,13 @@ async def generate_video_commentary(video_id: str, player_id: str, max_cues: int
 
     for index, window in enumerate(windows[:max_cues]):
         display_line, spoken_line = line_for_window(index, window, player)
+        clip_key = (
+            f"{video_id}_cue_{index + 1:02d}_"
+            f"{window['activity']['type']}_{str(window['start']).replace('.', '_')}"
+        )
         clip_path = await generate_commentary_clip(
             player_id=player_id,
-            template_id=f"{video_id}_cue_{index + 1:02d}",
+            template_id=clip_key,
             text=spoken_line,
             style="neutral",
             output_dir=output_dir,
