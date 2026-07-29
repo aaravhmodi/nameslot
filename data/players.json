@@ -82,5 +82,33 @@
       "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_c6b3a1b8\\last_excited.mp3",
       "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_c6b3a1b8\\goal_call.mp3"
     }
+  },
+  "player_aa23ca9b": {
+    "player_id": "player_aa23ca9b",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": null,
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_aa23ca9b\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_aa23ca9b\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_aa23ca9b\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_aa23ca9b\\goal_call.mp3"
+    }
+  },
+  "player_d537d350": {
+    "player_id": "player_d537d350",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": null,
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d537d350\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d537d350\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d537d350\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d537d350\\goal_call.mp3"
+    }
   }
 }

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from video.analyzer import STORAGE, analyze_star_timeline, save_upload
 from video.commentary import ANALYSIS, generate_video_commentary
+from video.renderer import export_proof_clips
 
 router = APIRouter()
 
@@ -13,6 +14,11 @@ router = APIRouter()
 class CommentaryRequest(BaseModel):
     player_id: str
     max_cues: int = 8
+
+
+class ProofClipRequest(BaseModel):
+    padding_seconds: float = 2.0
+    max_clips: int = 6
 
 
 @router.post("/analyze-star")
@@ -59,3 +65,21 @@ def get_commentary_clip(video_id: str, filename: str):
     if Path(filename).name != filename or not path.exists() or path.suffix.lower() != ".mp3":
         raise HTTPException(status_code=404, detail="Commentary clip not found")
     return FileResponse(path, media_type="audio/mpeg")
+
+
+@router.post("/{video_id}/proof-clips")
+def create_proof_clips(video_id: str, body: ProofClipRequest):
+    try:
+        return export_proof_clips(video_id, body.padding_seconds, body.max_clips)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/proof/{video_id}/{filename}")
+def get_proof_clip(video_id: str, filename: str):
+    path = ANALYSIS / video_id / "proof_clips" / filename
+    if Path(filename).name != filename or not path.exists() or path.suffix.lower() != ".mp4":
+        raise HTTPException(status_code=404, detail="Proof clip not found")
+    return FileResponse(path, media_type="video/mp4", filename=filename)
