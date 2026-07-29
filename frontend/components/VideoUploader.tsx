@@ -53,13 +53,35 @@ interface CommentaryResult {
   cues: CommentaryCue[];
 }
 
+interface ProofClip {
+  cue_id: string;
+  activity: {
+    type: string;
+    label: string;
+    detail: string;
+  };
+  start: number;
+  end: number;
+  text: string;
+  file: string;
+  video_url: string;
+}
+
+interface ProofClipResult {
+  video_id: string;
+  clips_exported: number;
+  clips: ProofClip[];
+}
+
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [playerId, setPlayerId] = useState("");
   const [commentary, setCommentary] = useState<CommentaryResult | null>(null);
+  const [proofClips, setProofClips] = useState<ProofClipResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [commentaryLoading, setCommentaryLoading] = useState(false);
+  const [proofLoading, setProofLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function analyzeVideo(event: React.FormEvent) {
@@ -88,6 +110,7 @@ export default function VideoUploader() {
       }
       setResult(data);
       setCommentary(null);
+      setProofClips(null);
     } catch {
       setError("Could not reach the video API on localhost:8000.");
     } finally {
@@ -118,10 +141,37 @@ export default function VideoUploader() {
         return;
       }
       setCommentary(data);
+      setProofClips(null);
     } catch {
       setError("Could not reach the commentary API on localhost:8000.");
     } finally {
       setCommentaryLoading(false);
+    }
+  }
+
+  async function exportProofClips() {
+    if (!commentary) {
+      return;
+    }
+
+    setProofLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/video/${commentary.video_id}/proof-clips`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ padding_seconds: 2, max_clips: 6 }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Proof clip export failed.");
+        return;
+      }
+      setProofClips(data);
+    } catch {
+      setError("Could not reach the proof clip export API on localhost:8000.");
+    } finally {
+      setProofLoading(false);
     }
   }
 
@@ -244,9 +294,18 @@ export default function VideoUploader() {
             <h2 className="mt-1 text-2xl font-semibold text-stone-50">{commentary.player_name}</h2>
             <p className="mt-2 text-sm text-stone-400">
               These cues are timed from yellow-star visibility windows and classified from player-marker movement.
-              Next step is recognizing hard events like shots, goals, saves, and celebrations.
+              Export proof clips to show the gameplay segment with commentary mixed in.
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={exportProofClips}
+            disabled={proofLoading}
+            className="rounded-md bg-[#d7c37a] px-4 py-3 text-sm font-semibold uppercase text-[#151512] transition hover:bg-stone-100 disabled:opacity-50"
+          >
+            {proofLoading ? "Exporting proof clips..." : "Export proof clips"}
+          </button>
 
           <div className="space-y-3">
             {commentary.cues.map((cue) => (
@@ -265,6 +324,46 @@ export default function VideoUploader() {
                 </div>
                 <p className="mt-2 text-sm text-stone-300">"{cue.text}"</p>
                 <audio className="mt-3 w-full" controls src={`${API_BASE}${cue.audio_url}`} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {proofClips && (
+        <section className="space-y-4 rounded-lg border border-white/10 bg-[#101613]/85 p-5 shadow-xl shadow-black/25 backdrop-blur">
+          <div>
+            <p className="text-xs font-medium uppercase text-stone-400">Proof exports</p>
+            <h2 className="mt-1 text-2xl font-semibold text-stone-50">
+              {proofClips.clips_exported} clips exported
+            </h2>
+            <p className="mt-2 text-sm text-stone-400">
+              Each clip is cut around the yellow-star player window and includes the generated commentary audio.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {proofClips.clips.map((clip) => (
+              <div key={clip.file} className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
+                <video className="aspect-video w-full bg-black" controls src={`${API_BASE}${clip.video_url}`} />
+                <div className="space-y-2 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-stone-50">
+                      {clip.start.toFixed(2)}s - {clip.end.toFixed(2)}s
+                    </span>
+                    <span className="rounded-sm bg-[#d7c37a]/15 px-2 py-1 text-xs font-medium uppercase text-[#d7c37a]">
+                      {clip.activity.label}
+                    </span>
+                  </div>
+                  <p className="text-sm text-stone-300">"{clip.text}"</p>
+                  <a
+                    className="inline-flex text-sm font-medium text-[#d7c37a] underline"
+                    href={`${API_BASE}${clip.video_url}`}
+                    download
+                  >
+                    Download MP4
+                  </a>
+                </div>
               </div>
             ))}
           </div>
