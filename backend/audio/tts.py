@@ -68,9 +68,11 @@ async def generate_commentary_clip(
     template_id: str,
     text: str,
     style: str,
+    output_dir: Path | None = None,
 ) -> Path:
-    FINAL_OUTPUTS.mkdir(parents=True, exist_ok=True)
-    out_path = FINAL_OUTPUTS / f"{player_id}_{template_id}.mp3"
+    target_dir = output_dir or FINAL_OUTPUTS
+    target_dir.mkdir(parents=True, exist_ok=True)
+    out_path = target_dir / f"{player_id}_{template_id}.mp3"
     if out_path.exists():
         return out_path
 
