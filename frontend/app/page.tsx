@@ -71,7 +71,23 @@ export default function Home() {
         </div>
 
         {player ? (
-          <EventPanel playerId={player.player_id} displayName={player.display_name} />
+          <div className="space-y-4">
+            <section className="rounded-lg border border-white/10 bg-[#101613]/85 p-4 text-sm text-stone-300 shadow-xl shadow-black/20">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase text-stone-500">Use this in video lab</p>
+                  <p className="font-mono text-stone-100">{player.player_id}</p>
+                </div>
+                <Link
+                  href="/video"
+                  className="rounded-md bg-[#9ab6bd] px-4 py-2 text-sm font-semibold text-[#101613] hover:bg-stone-100"
+                >
+                  Open video lab
+                </Link>
+              </div>
+            </section>
+            <EventPanel playerId={player.player_id} displayName={player.display_name} />
+          </div>
         ) : (
           <section className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-white/15 bg-[#101613]/70 p-8 text-center text-stone-300">
             <div>

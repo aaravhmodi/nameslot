@@ -32,6 +32,9 @@ def build_star_windows(timeline: list[dict], gap_seconds: float = 3.0) -> list[d
         confidence = float((item.get("star") or {}).get("confidence") or 0)
         anchor = item.get("player_anchor") or {}
 
+        anchor_x = float(anchor.get("x") or 0)
+        anchor_y = float(anchor.get("y") or 0)
+
         if current is None or time - current["end"] > gap_seconds:
             current = {
                 "start": time,
@@ -40,25 +43,29 @@ def build_star_windows(timeline: list[dict], gap_seconds: float = 3.0) -> list[d
                 "confidence_total": 0.0,
                 "x_total": 0.0,
                 "y_total": 0.0,
+                "points": [],
             }
             windows.append(current)
 
         current["end"] = time
         current["samples"] += 1
         current["confidence_total"] += confidence
-        current["x_total"] += float(anchor.get("x") or 0)
-        current["y_total"] += float(anchor.get("y") or 0)
+        current["x_total"] += anchor_x
+        current["y_total"] += anchor_y
+        current["points"].append({"time": time, "x": anchor_x, "y": anchor_y})
 
     normalized = []
     for window in windows:
         samples = max(window["samples"], 1)
         duration = window["end"] - window["start"]
+        activity = classify_activity(window["points"], window["end"] - window["start"])
         normalized.append({
             "start": round(window["start"], 2),
             "end": round(window["end"], 2),
             "duration": round(duration, 2),
             "samples": window["samples"],
             "confidence": round(window["confidence_total"] / samples, 2),
+            "activity": activity,
             "player_anchor": {
                 "x": round(window["x_total"] / samples),
                 "y": round(window["y_total"] / samples),
@@ -67,14 +74,85 @@ def build_star_windows(timeline: list[dict], gap_seconds: float = 3.0) -> list[d
     return normalized
 
 
+def classify_activity(points: list[dict], duration: float) -> dict:
+    if len(points) < 2 or duration <= 0:
+        return {
+            "type": "located",
+            "label": "player located",
+            "detail": "The marker is visible, but there is not enough motion to classify the action.",
+        }
+
+    total_distance = 0.0
+    net_x = points[-1]["x"] - points[0]["x"]
+    net_y = points[-1]["y"] - points[0]["y"]
+    for previous, current in zip(points, points[1:]):
+        dx = current["x"] - previous["x"]
+        dy = current["y"] - previous["y"]
+        total_distance += (dx * dx + dy * dy) ** 0.5
+
+    speed = total_distance / duration
+    horizontal_bias = abs(net_x) - abs(net_y)
+
+    if speed >= 95:
+        return {
+            "type": "driving_run",
+            "label": "driving run",
+            "detail": "The controlled player is moving quickly through the phase of play.",
+        }
+    if speed >= 45 and horizontal_bias > 20:
+        return {
+            "type": "wide_movement",
+            "label": "wide movement",
+            "detail": "The controlled player is shifting laterally across the pitch.",
+        }
+    if speed >= 35:
+        return {
+            "type": "moving_into_space",
+            "label": "moving into space",
+            "detail": "The controlled player is active and changing position.",
+        }
+    if duration >= 8:
+        return {
+            "type": "sustained_involvement",
+            "label": "sustained involvement",
+            "detail": "The controlled player stays involved for an extended spell.",
+        }
+    return {
+        "type": "holding_position",
+        "label": "holding position",
+        "detail": "The controlled player is visible but moving only slightly.",
+    }
+
+
 def line_for_window(index: int, window: dict, player: dict) -> tuple[str, str]:
     display = player["display_name"]
     spoken = spoken_player_name(player)
+    activity_type = window["activity"]["type"]
 
     if index == 0:
+        if activity_type == "driving_run":
+            return (
+                f"{display} bursts into the action early, carrying the play forward with real purpose.",
+                f"{spoken} bursts into the action early, carrying the play forward with real purpose.",
+            )
         return (
-            f"{display} is getting involved early, looking sharp whenever the ball comes near.",
-            f"{spoken} is getting involved early, looking sharp whenever the ball comes near.",
+            f"{display} is getting involved early, trying to find space and influence the game.",
+            f"{spoken} is getting involved early, trying to find space and influence the game.",
+        )
+    if activity_type == "driving_run":
+        return (
+            f"{display} is on the move here, driving forward and asking questions of the defence.",
+            f"{spoken} is on the move here, driving forward and asking questions of the defence.",
+        )
+    if activity_type == "wide_movement":
+        return (
+            f"{display} drifts across the pitch, looking for a better angle to open the play up.",
+            f"{spoken} drifts across the pitch, looking for a better angle to open the play up.",
+        )
+    if activity_type == "moving_into_space":
+        return (
+            f"Good movement from {display}, always trying to make himself available.",
+            f"Good movement from {spoken}, always trying to make himself available.",
         )
     if window["duration"] >= 8:
         return (
@@ -116,6 +194,7 @@ async def generate_video_commentary(video_id: str, player_id: str, max_cues: int
             "start": window["start"],
             "end": window["end"],
             "confidence": window["confidence"],
+            "activity": window["activity"],
             "text": display_line,
             "spoken_text": spoken_line,
             "audio_url": f"/video/commentary/{video_id}/{clip_path.name}",

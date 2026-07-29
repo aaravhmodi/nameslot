@@ -36,6 +36,11 @@ interface CommentaryCue {
   start: number;
   end: number;
   confidence: number;
+  activity: {
+    type: string;
+    label: string;
+    detail: string;
+  };
   text: string;
   spoken_text: string;
   audio_url: string;
@@ -133,7 +138,7 @@ export default function VideoUploader() {
           <h2 className="mt-1 text-2xl font-semibold text-stone-50">Yellow star detector</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-300">
             Upload a gameplay clip and NameSlot will sample frames, find the yellow star above
-            your player, and build a first-pass timeline for later commentary generation.
+            your player, estimate movement, and build a first-pass timeline for commentary generation.
           </p>
         </div>
 
@@ -238,7 +243,8 @@ export default function VideoUploader() {
             <p className="text-xs font-medium uppercase text-stone-400">Generated commentary</p>
             <h2 className="mt-1 text-2xl font-semibold text-stone-50">{commentary.player_name}</h2>
             <p className="mt-2 text-sm text-stone-400">
-              These cues are timed from yellow-star visibility windows. Next step is merging them onto the video timeline.
+              These cues are timed from yellow-star visibility windows and classified from player-marker movement.
+              Next step is recognizing hard events like shots, goals, saves, and celebrations.
             </p>
           </div>
 
@@ -250,6 +256,12 @@ export default function VideoUploader() {
                     {cue.start.toFixed(2)}s - {cue.end.toFixed(2)}s
                   </span>
                   <span className="text-xs text-stone-500">confidence {cue.confidence}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="rounded-sm bg-[#d7c37a]/15 px-2 py-1 text-xs font-medium uppercase text-[#d7c37a]">
+                    {cue.activity.label}
+                  </span>
+                  <span className="text-xs text-stone-500">{cue.activity.detail}</span>
                 </div>
                 <p className="mt-2 text-sm text-stone-300">"{cue.text}"</p>
                 <audio className="mt-3 w-full" controls src={`${API_BASE}${cue.audio_url}`} />
