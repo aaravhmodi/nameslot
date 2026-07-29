@@ -60,8 +60,15 @@ Open http://localhost:3000
 
 ## Template audio
 
-`storage/templates/` needs prerecorded WAV files for commentary prefix/suffix phrases.
-For the MVP, generate these yourself with ElevenLabs or any TTS using the same voice:
+Event clicks currently generate the full commentary line directly with ElevenLabs using
+the selected template text and the player's pronunciation hint.
+
+`storage/templates/` is optional legacy support for prerecorded WAV files used by the
+stitching helper. If you use stitched template audio later, install `ffmpeg` first;
+without it, `pydub` may not be able to combine MP3/WAV files.
+
+For stitched template audio, generate these yourself with ElevenLabs or any TTS using
+the same voice:
 
 | File | Text |
 |------|------|
@@ -82,5 +89,5 @@ For the MVP, generate these yourself with ElevenLabs or any TTS using the same v
 2. Backend calls ElevenLabs → generates 4 name variants (full neutral, last neutral, last excited, goal call)
 3. Clips are cached per player
 4. User clicks a game event (Goal, Through Ball, etc.)
-5. Backend picks a template, stitches prefix + name clip + suffix
+5. Backend picks a template and generates the full commentary line
 6. Frontend plays the final audio
