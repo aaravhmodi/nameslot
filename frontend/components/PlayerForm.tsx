@@ -43,23 +43,23 @@ export default function PlayerForm({ onCreated }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-lg border border-lime-300/25 bg-zinc-950/80 p-5 shadow-xl shadow-black/30 backdrop-blur"
+      className="space-y-4 rounded-lg border border-white/10 bg-[#101613]/85 p-5 shadow-xl shadow-black/25 backdrop-blur"
     >
       <div>
-        <p className="text-xs font-bold uppercase text-lime-200/80">Player setup</p>
-        <h2 className="mt-1 text-xl font-black text-white">Create match voice</h2>
+        <p className="text-xs font-medium uppercase text-stone-400">Player setup</p>
+        <h2 className="mt-1 text-xl font-semibold text-stone-50">Create match voice</h2>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         <input
-          className="min-w-0 rounded border border-white/15 bg-black/45 px-3 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-lime-300"
+          className="min-w-0 rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#d7c37a]"
           placeholder="First name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           required
         />
         <input
-          className="min-w-0 rounded border border-white/15 bg-black/45 px-3 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-lime-300"
+          className="min-w-0 rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#d7c37a]"
           placeholder="Last name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
@@ -68,18 +68,18 @@ export default function PlayerForm({ onCreated }: Props) {
       </div>
 
       <input
-        className="w-full rounded border border-white/15 bg-black/45 px-3 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-cyan-300"
+        className="w-full rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#9ab6bd]"
         placeholder="Pronunciation hint (optional, e.g. MO-dee)"
         value={hint}
         onChange={(e) => setHint(e.target.value)}
       />
 
-      {error && <p className="rounded border border-red-400/30 bg-red-950/50 px-3 py-2 text-sm text-red-100">{error}</p>}
+      {error && <p className="rounded-md border border-red-300/25 bg-red-950/35 px-3 py-2 text-sm text-red-100">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded bg-lime-300 px-4 py-3 text-sm font-black uppercase text-black transition hover:bg-cyan-200 disabled:opacity-50"
+        className="w-full rounded-md bg-[#d7c37a] px-4 py-3 text-sm font-semibold uppercase text-[#151512] transition hover:bg-stone-100 disabled:opacity-50"
       >
         {loading ? "Generating name audio..." : "Generate Name Audio"}
       </button>

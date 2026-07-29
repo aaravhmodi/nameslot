@@ -25,4 +25,6 @@ frontend/.next/
 # Generated audio storage
 storage/generated_names/
 storage/final_outputs/
+storage/uploads/
+storage/analysis/
 exports/
