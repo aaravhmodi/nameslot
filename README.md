@@ -47,6 +47,20 @@ npm run dev
 
 Open http://localhost:3000
 
+## FIFA overlay scaffold
+
+The first integration target is an external soundboard overlay:
+
+1. Run the backend and frontend locally.
+2. Create a player with a pronunciation hint if needed.
+3. Keep the NameSlot Commentary Desk open beside FIFA.
+4. Use hotkeys `1`-`8` to trigger event commentary clips.
+5. Route browser audio into your capture/game audio stack with a virtual audio device
+   such as VB-CABLE or Voicemeeter.
+
+This avoids modifying EA FC game files while the commentary pipeline is still being
+tuned. True in-game replacement can be explored later through PC modding tools.
+
 ## APIs needed
 
 | Service | What for | Tier |

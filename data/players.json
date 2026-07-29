@@ -26,5 +26,47 @@
       "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_81602464\\last_excited.mp3",
       "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_81602464\\goal_call.mp3"
     }
+  },
+  "player_24fba3d0": {
+    "player_id": "player_24fba3d0",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": "Aarav Modi",
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_24fba3d0\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_24fba3d0\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_24fba3d0\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_24fba3d0\\goal_call.mp3"
+    }
+  },
+  "player_d666d217": {
+    "player_id": "player_d666d217",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": "Modi",
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d666d217\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d666d217\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d666d217\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_d666d217\\goal_call.mp3"
+    }
+  },
+  "player_6ff3ece7": {
+    "player_id": "player_6ff3ece7",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": "Modi",
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_6ff3ece7\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_6ff3ece7\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_6ff3ece7\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_6ff3ece7\\goal_call.mp3"
+    }
   }
 }

@@ -70,6 +70,9 @@ async def generate_commentary_clip(
     style: str,
 ) -> Path:
     FINAL_OUTPUTS.mkdir(parents=True, exist_ok=True)
+    out_path = FINAL_OUTPUTS / f"{player_id}_{template_id}.mp3"
+    if out_path.exists():
+        return out_path
 
     settings = STYLE_SETTINGS[style]
     audio = client.text_to_speech.convert(
@@ -80,6 +83,5 @@ async def generate_commentary_clip(
         output_format="mp3_44100_128",
     )
 
-    out_path = FINAL_OUTPUTS / f"{player_id}_{template_id}.mp3"
     save(audio, str(out_path))
     return out_path
