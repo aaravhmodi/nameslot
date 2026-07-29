@@ -41,19 +41,25 @@ export default function PlayerForm({ onCreated }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 border rounded-xl p-6">
-      <h2 className="text-xl font-semibold">Create your player</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-lg border border-lime-300/25 bg-zinc-950/80 p-5 shadow-xl shadow-black/30 backdrop-blur"
+    >
+      <div>
+        <p className="text-xs font-bold uppercase text-lime-200/80">Player setup</p>
+        <h2 className="mt-1 text-xl font-black text-white">Create match voice</h2>
+      </div>
 
-      <div className="flex gap-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         <input
-          className="border rounded px-3 py-2 flex-1"
+          className="min-w-0 rounded border border-white/15 bg-black/45 px-3 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-lime-300"
           placeholder="First name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           required
         />
         <input
-          className="border rounded px-3 py-2 flex-1"
+          className="min-w-0 rounded border border-white/15 bg-black/45 px-3 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-lime-300"
           placeholder="Last name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
@@ -62,18 +68,18 @@ export default function PlayerForm({ onCreated }: Props) {
       </div>
 
       <input
-        className="border rounded px-3 py-2 w-full"
+        className="w-full rounded border border-white/15 bg-black/45 px-3 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-cyan-300"
         placeholder="Pronunciation hint (optional, e.g. MO-dee)"
         value={hint}
         onChange={(e) => setHint(e.target.value)}
       />
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="rounded border border-red-400/30 bg-red-950/50 px-3 py-2 text-sm text-red-100">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+        className="w-full rounded bg-lime-300 px-4 py-3 text-sm font-black uppercase text-black transition hover:bg-cyan-200 disabled:opacity-50"
       >
         {loading ? "Generating name audio..." : "Generate Name Audio"}
       </button>
