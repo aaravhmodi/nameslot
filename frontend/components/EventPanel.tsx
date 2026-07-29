@@ -22,15 +22,23 @@ export default function EventPanel({ playerId, displayName }: Props) {
   const [lastLine, setLastLine] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function triggerEvent(eventId: string, intensity: string) {
     setLoading(true);
+    setError("");
     const res = await fetch("http://localhost:8000/events/trigger", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ player_id: playerId, event_id: eventId, intensity }),
     });
     const data = await res.json();
+    if (!res.ok) {
+      setError(data.detail || "Failed to trigger event.");
+      setLoading(false);
+      return;
+    }
+
     setLastLine(data.text_preview);
     setAudioUrl(`http://localhost:8000${data.audio_url}`);
     setLoading(false);
@@ -38,7 +46,7 @@ export default function EventPanel({ playerId, displayName }: Props) {
 
   return (
     <div className="space-y-4 border rounded-xl p-6">
-      <h2 className="text-xl font-semibold">Commentary events — {displayName}</h2>
+      <h2 className="text-xl font-semibold">Commentary events - {displayName}</h2>
 
       <div className="grid grid-cols-2 gap-3">
         {EVENTS.map((ev) => (
@@ -52,6 +60,8 @@ export default function EventPanel({ playerId, displayName }: Props) {
           </button>
         ))}
       </div>
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       {lastLine && (
         <div className="bg-gray-50 rounded-lg p-4 space-y-2">

@@ -28,13 +28,14 @@ export default function PlayerForm({ onCreated }: Props) {
       }),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      setError("Failed to create player.");
+      setError(data.detail || "Failed to create player.");
       setLoading(false);
       return;
     }
 
-    const data = await res.json();
     onCreated(data);
     setLoading(false);
   }
@@ -74,7 +75,7 @@ export default function PlayerForm({ onCreated }: Props) {
         disabled={loading}
         className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
       >
-        {loading ? "Generating name audio…" : "Generate Name Audio"}
+        {loading ? "Generating name audio..." : "Generate Name Audio"}
       </button>
     </form>
   );

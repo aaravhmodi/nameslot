@@ -1,4 +1,5 @@
 import random
+from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from audio.cache import get_player
@@ -8,6 +9,8 @@ from data.templates import load_templates
 router = APIRouter()
 
 _recently_used: list[str] = []
+STORAGE = Path(__file__).parent.parent.parent / "storage"
+TEMPLATE_DIR = STORAGE / "templates"
 
 
 class EventTrigger(BaseModel):
@@ -43,6 +46,15 @@ async def trigger_event(body: EventTrigger):
     clip_path = player["clips"].get(variant)
     if not clip_path:
         raise HTTPException(status_code=422, detail=f"Missing clip variant: {variant}")
+
+    has_prefix = bool(chosen.get("prefix_audio") and (TEMPLATE_DIR / chosen["prefix_audio"]).exists())
+    has_suffix = bool(chosen.get("suffix_audio") and (TEMPLATE_DIR / chosen["suffix_audio"]).exists())
+    if not has_prefix and not has_suffix:
+        return {
+            "template_id": chosen["template_id"],
+            "text_preview": chosen["text_preview"],
+            "audio_url": f"/audio/generated/{body.player_id}/{Path(clip_path).name}",
+        }
 
     output_path = await stitch_commentary(
         prefix_audio=chosen.get("prefix_audio"),
