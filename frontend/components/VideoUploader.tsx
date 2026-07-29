@@ -31,10 +31,30 @@ interface AnalysisResult {
   timeline: TimelineItem[];
 }
 
+interface CommentaryCue {
+  cue_id: string;
+  start: number;
+  end: number;
+  confidence: number;
+  text: string;
+  spoken_text: string;
+  audio_url: string;
+}
+
+interface CommentaryResult {
+  video_id: string;
+  player_id: string;
+  player_name: string;
+  cues: CommentaryCue[];
+}
+
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [playerId, setPlayerId] = useState("");
+  const [commentary, setCommentary] = useState<CommentaryResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [commentaryLoading, setCommentaryLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function analyzeVideo(event: React.FormEvent) {
@@ -62,10 +82,41 @@ export default function VideoUploader() {
         return;
       }
       setResult(data);
+      setCommentary(null);
     } catch {
       setError("Could not reach the video API on localhost:8000.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function generateCommentary() {
+    if (!result) {
+      return;
+    }
+    if (!playerId.trim()) {
+      setError("Enter the player ID from the commentary desk first.");
+      return;
+    }
+
+    setCommentaryLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/video/${result.video_id}/commentary`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player_id: playerId.trim(), max_cues: 8 }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Commentary generation failed.");
+        return;
+      }
+      setCommentary(data);
+    } catch {
+      setError("Could not reach the commentary API on localhost:8000.");
+    } finally {
+      setCommentaryLoading(false);
     }
   }
 
@@ -96,6 +147,23 @@ export default function VideoUploader() {
           />
           {file && <span className="mt-2 block text-xs text-stone-500">{file.name}</span>}
         </label>
+
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+          <input
+            value={playerId}
+            onChange={(event) => setPlayerId(event.target.value)}
+            placeholder="Player ID, e.g. player_6ff3ece7"
+            className="min-w-0 rounded-md border border-white/10 bg-stone-950/35 px-3 py-3 text-stone-50 placeholder:text-stone-500 outline-none transition focus:border-[#d7c37a]"
+          />
+          <button
+            type="button"
+            onClick={generateCommentary}
+            disabled={!result || commentaryLoading}
+            className="rounded-md bg-[#9ab6bd] px-4 py-3 text-sm font-semibold uppercase text-[#101613] transition hover:bg-stone-100 disabled:opacity-50"
+          >
+            {commentaryLoading ? "Generating cues..." : "Generate commentary cues"}
+          </button>
+        </div>
 
         {error && <p className="rounded-md border border-red-300/25 bg-red-950/35 px-3 py-2 text-sm text-red-100">{error}</p>}
 
@@ -161,6 +229,33 @@ export default function VideoUploader() {
               No yellow star was detected in the sampled frames. Try a clip where the player marker is visible and not hidden by camera cuts or menus.
             </p>
           )}
+        </section>
+      )}
+
+      {commentary && (
+        <section className="space-y-4 rounded-lg border border-white/10 bg-[#101613]/85 p-5 shadow-xl shadow-black/25 backdrop-blur">
+          <div>
+            <p className="text-xs font-medium uppercase text-stone-400">Generated commentary</p>
+            <h2 className="mt-1 text-2xl font-semibold text-stone-50">{commentary.player_name}</h2>
+            <p className="mt-2 text-sm text-stone-400">
+              These cues are timed from yellow-star visibility windows. Next step is merging them onto the video timeline.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {commentary.cues.map((cue) => (
+              <div key={cue.cue_id} className="rounded-md border border-white/10 bg-white/[0.04] p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-stone-50">
+                    {cue.start.toFixed(2)}s - {cue.end.toFixed(2)}s
+                  </span>
+                  <span className="text-xs text-stone-500">confidence {cue.confidence}</span>
+                </div>
+                <p className="mt-2 text-sm text-stone-300">"{cue.text}"</p>
+                <audio className="mt-3 w-full" controls src={`${API_BASE}${cue.audio_url}`} />
+              </div>
+            ))}
+          </div>
         </section>
       )}
     </div>
