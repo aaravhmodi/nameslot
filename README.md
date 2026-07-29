@@ -61,6 +61,27 @@ The first integration target is an external soundboard overlay:
 This avoids modifying EA FC game files while the commentary pipeline is still being
 tuned. True in-game replacement can be explored later through PC modding tools.
 
+## EA FC mod export scaffold
+
+Use the **Export EA FC pack** button after creating a player and generating any event
+clips you want to keep. The backend writes a local pack under:
+
+```text
+exports/eafc-commentary-pack/
+```
+
+Each pack contains:
+
+```text
+audio/names/      Cached player-name clips
+audio/events/     Full commentary event clips
+manifest.csv      Clip map for manual modding work
+rdbm-notes.md     Local notes for FIFA Editor Tool / RDBM mapping
+```
+
+The export does not call ElevenLabs. It only packages files that already exist in
+`storage/generated_names/` and `storage/final_outputs/`.
+
 ## APIs needed
 
 | Service | What for | Tier |
