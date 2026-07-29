@@ -1,22 +1,50 @@
 import random
-from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from audio.cache import get_player
-from audio.stitch import stitch_commentary
+from audio.tts import generate_commentary_clip
 from data.templates import load_templates
 
 router = APIRouter()
 
 _recently_used: list[str] = []
-STORAGE = Path(__file__).parent.parent.parent / "storage"
-TEMPLATE_DIR = STORAGE / "templates"
 
 
 class EventTrigger(BaseModel):
     player_id: str
     event_id: str
     intensity: str = "medium"
+
+
+TOKEN_TO_PLAYER_FIELD = {
+    "FULL_NEUTRAL": "display_name",
+    "LAST_NEUTRAL": "preferred_callout",
+    "LAST_EXCITED": "preferred_callout",
+    "GOAL_CALL": "preferred_callout",
+}
+
+VARIANT_STYLE = {
+    "full_neutral": "neutral",
+    "last_neutral": "neutral",
+    "last_excited": "excited",
+    "goal_call": "dramatic",
+}
+
+
+def render_line(template: str, player: dict, spoken: bool = False) -> str:
+    line = template
+    spoken_callout = player.get("pronunciation_hint") or player["preferred_callout"]
+    spoken_full = player["display_name"]
+    if player.get("pronunciation_hint") and spoken_full.endswith(player["last_name"]):
+        spoken_full = f"{player['first_name']} {player['pronunciation_hint']}"
+
+    for token, field in TOKEN_TO_PLAYER_FIELD.items():
+        if spoken:
+            value = spoken_full if token == "FULL_NEUTRAL" else spoken_callout
+        else:
+            value = player[field]
+        line = line.replace(f"{{{token}}}", value)
+    return line
 
 
 @router.post("/trigger")
@@ -47,25 +75,17 @@ async def trigger_event(body: EventTrigger):
     if not clip_path:
         raise HTTPException(status_code=422, detail=f"Missing clip variant: {variant}")
 
-    has_prefix = bool(chosen.get("prefix_audio") and (TEMPLATE_DIR / chosen["prefix_audio"]).exists())
-    has_suffix = bool(chosen.get("suffix_audio") and (TEMPLATE_DIR / chosen["suffix_audio"]).exists())
-    if not has_prefix and not has_suffix:
-        return {
-            "template_id": chosen["template_id"],
-            "text_preview": chosen["text_preview"],
-            "audio_url": f"/audio/generated/{body.player_id}/{Path(clip_path).name}",
-        }
-
-    output_path = await stitch_commentary(
-        prefix_audio=chosen.get("prefix_audio"),
-        name_audio=clip_path,
-        suffix_audio=chosen.get("suffix_audio"),
-        template_id=chosen["template_id"],
+    display_line = render_line(chosen["text_preview"], player)
+    spoken_line = render_line(chosen["text_preview"], player, spoken=True)
+    output_path = await generate_commentary_clip(
         player_id=body.player_id,
+        template_id=chosen["template_id"],
+        text=spoken_line,
+        style=VARIANT_STYLE.get(variant, "neutral"),
     )
 
     return {
         "template_id": chosen["template_id"],
-        "text_preview": chosen["text_preview"],
+        "text_preview": display_line,
         "audio_url": f"/audio/final/{output_path.name}",
     }

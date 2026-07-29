@@ -4,6 +4,7 @@ from elevenlabs.client import ElevenLabs
 from elevenlabs import save
 
 STORAGE = Path(__file__).parent.parent.parent / "storage" / "generated_names"
+FINAL_OUTPUTS = Path(__file__).parent.parent.parent / "storage" / "final_outputs"
 VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
@@ -38,10 +39,13 @@ async def generate_name_clips(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clips: dict[str, str] = {}
+    spoken_callout = pronunciation_hint or callout
+    spoken_full_name = full_name
+    if pronunciation_hint and full_name.endswith(callout):
+        spoken_full_name = f"{full_name[: -len(callout)].rstrip()} {pronunciation_hint}"
+
     for variant_key, (text_template, style) in VARIANTS.items():
-        text = text_template.format(full_name=full_name, callout=callout)
-        if pronunciation_hint:
-            text = pronunciation_hint if variant_key in ("full_neutral", "last_neutral") else text
+        text = text_template.format(full_name=spoken_full_name, callout=spoken_callout)
 
         settings = STYLE_SETTINGS[style]
         audio = client.text_to_speech.convert(
@@ -57,3 +61,25 @@ async def generate_name_clips(
         clips[variant_key] = str(out_path)
 
     return clips
+
+
+async def generate_commentary_clip(
+    player_id: str,
+    template_id: str,
+    text: str,
+    style: str,
+) -> Path:
+    FINAL_OUTPUTS.mkdir(parents=True, exist_ok=True)
+
+    settings = STYLE_SETTINGS[style]
+    audio = client.text_to_speech.convert(
+        voice_id=VOICE_ID,
+        text=text,
+        model_id="eleven_multilingual_v2",
+        voice_settings=settings,
+        output_format="mp3_44100_128",
+    )
+
+    out_path = FINAL_OUTPUTS / f"{player_id}_{template_id}.mp3"
+    save(audio, str(out_path))
+    return out_path

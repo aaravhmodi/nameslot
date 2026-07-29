@@ -1,0 +1,30 @@
+{
+  "player_226f7157": {
+    "player_id": "player_226f7157",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": "MO-dee",
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_226f7157\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_226f7157\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_226f7157\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_226f7157\\goal_call.mp3"
+    }
+  },
+  "player_81602464": {
+    "player_id": "player_81602464",
+    "first_name": "Aarav",
+    "last_name": "Modi",
+    "display_name": "Aarav Modi",
+    "preferred_callout": "Modi",
+    "pronunciation_hint": "Modi",
+    "clips": {
+      "full_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_81602464\\full_neutral.mp3",
+      "last_neutral": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_81602464\\last_neutral.mp3",
+      "last_excited": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_81602464\\last_excited.mp3",
+      "goal_call": "C:\\Users\\upsid\\documents\\projects\\nameslot\\storage\\generated_names\\player_81602464\\goal_call.mp3"
+    }
+  }
+}
