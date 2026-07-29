@@ -4,9 +4,15 @@ from elevenlabs.client import ElevenLabs
 from elevenlabs import save
 
 STORAGE = Path(__file__).parent.parent.parent / "storage" / "generated_names"
-VOICE_ID = os.environ["ELEVENLABS_VOICE_ID"]  # set this to a sports commentator voice
+VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
+API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
-client = ElevenLabs(api_key=os.environ["ELEVENLABS_API_KEY"])
+if not API_KEY:
+    raise RuntimeError("Missing ELEVENLABS_API_KEY in backend/.env")
+if not VOICE_ID:
+    raise RuntimeError("Missing ELEVENLABS_VOICE_ID in backend/.env")
+
+client = ElevenLabs(api_key=API_KEY)
 
 VARIANTS = {
     "full_neutral": ("{full_name}", "neutral"),

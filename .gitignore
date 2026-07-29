@@ -1,17 +1,27 @@
 # Environment files
 .env
 **/.env
+.env.*
+**/.env.*
+!.env.example
+!**/.env.example
 
 # Python
 __pycache__/
 **/__pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
 .venv/
 **/.venv/
 
 # Node
 node_modules/
 **/node_modules/
+.next/
+frontend/.next/
 
 # Generated audio storage
 storage/generated_names/
+storage/final_outputs/
