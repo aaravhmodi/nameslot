@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -23,10 +24,32 @@ def load_commentary(video_id: str) -> dict:
 
 
 def require_ffmpeg() -> str:
+    configured = os.getenv("FFMPEG_PATH")
+    if configured:
+        path = Path(configured)
+        if path.exists():
+            return str(path)
+        raise RuntimeError(f"FFMPEG_PATH is set but the file does not exist: {configured}")
+
     ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg:
+        path = Path(ffmpeg)
+        if path.exists() and path.stat().st_size > 0:
+            return ffmpeg
+
+        if path.is_symlink():
+            target = path.resolve()
+            if target.exists():
+                return str(target)
+
+    winget_package = Path.home() / "AppData" / "Local" / "Microsoft" / "WinGet" / "Packages"
+    matches = list(winget_package.glob("Gyan.FFmpeg*/*/bin/ffmpeg.exe")) if winget_package.exists() else []
+    if matches:
+        return str(matches[0])
+
     if not ffmpeg:
         raise RuntimeError("FFmpeg is required to export proof clips. Install FFmpeg and make sure ffmpeg.exe is on PATH.")
-    return ffmpeg
+    raise RuntimeError(f"FFmpeg was found at {ffmpeg}, but it is not a usable executable. Reinstall FFmpeg or put the real bin folder on PATH.")
 
 
 def export_proof_clips(video_id: str, padding_seconds: float = 2.0, max_clips: int = 6) -> dict:
