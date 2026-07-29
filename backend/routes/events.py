@@ -20,7 +20,7 @@ TOKEN_TO_PLAYER_FIELD = {
     "FULL_NEUTRAL": "display_name",
     "LAST_NEUTRAL": "preferred_callout",
     "LAST_EXCITED": "preferred_callout",
-    "GOAL_CALL": "preferred_callout",
+    "GOAL_CALL": "display_name",
 }
 
 VARIANT_STYLE = {
@@ -40,7 +40,7 @@ def render_line(template: str, player: dict, spoken: bool = False) -> str:
 
     for token, field in TOKEN_TO_PLAYER_FIELD.items():
         if spoken:
-            value = spoken_full if token == "FULL_NEUTRAL" else spoken_callout
+            value = spoken_full if token in ("FULL_NEUTRAL", "GOAL_CALL") else spoken_callout
         else:
             value = player[field]
         line = line.replace(f"{{{token}}}", value)
